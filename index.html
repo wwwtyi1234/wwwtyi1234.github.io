@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>根據學生特質進行生涯推薦</title>
+  <meta http-equiv="Content-Security-Policy"
+        content="
+          default-src 'self' data: blob: https://cai-innoserve.gss.com.tw;
+          script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cai-innoserve.gss.com.tw;
+          style-src 'self' 'unsafe-inline' https://cai-innoserve.gss.com.tw;
+          img-src 'self' data: blob: https://cai-innoserve.gss.com.tw;
+          font-src 'self' data: https://cai-innoserve.gss.com.tw;
+          connect-src 'self' https://cai-innoserve.gss.com.tw wss://cai-innoserve.gss.com.tw;
+          frame-src https://cai-innoserve.gss.com.tw;
+        ">
+  <style>
+    :root{--primary:#1f5fd1;--bg:#f4f7fd;--text:#1f2937;--muted:#64748b}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif;color:var(--text);background:linear-gradient(135deg,#f8faff,#eef4ff);min-height:100vh}
+    header{height:72px;padding:0 7vw;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid #e5e7eb}
+    .brand{font-weight:800;font-size:22px;color:var(--primary)}
+    .tag{font-size:14px;color:var(--muted)}
+    main{max-width:1120px;margin:auto;padding:76px 24px 100px}
+    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:42px;align-items:center}
+    .pill{display:inline-block;padding:8px 14px;border-radius:999px;background:#e8f0ff;color:var(--primary);font-weight:700;margin-bottom:18px}
+    h1{margin:0 0 20px;font-size:clamp(38px,5vw,64px);line-height:1.14}
+    .lead{font-size:18px;line-height:1.8;color:var(--muted)}
+    .primary-btn{margin-top:16px;border:0;border-radius:12px;padding:14px 22px;font-size:16px;font-weight:800;color:#fff;background:var(--primary);cursor:pointer;box-shadow:0 10px 30px rgba(31,95,209,.22)}
+    .flow-card{background:#fff;border:1px solid #e5e7eb;border-radius:24px;padding:28px;box-shadow:0 18px 50px rgba(30,64,175,.10)}
+    .step{padding:15px 18px;border:1px solid #e5e7eb;border-radius:14px;background:#f8fafc;font-weight:700}
+    .arrow{text-align:center;color:#94a3b8;padding:8px 0}
+    .features{margin-top:70px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .feature{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:22px}
+    .feature h3{margin:0 0 10px;color:var(--primary)}
+    .feature p{margin:0;color:var(--muted);line-height:1.7}
+    .note{margin-top:30px;color:var(--muted);font-size:14px}
+    #career-launcher{position:fixed;right:24px;bottom:24px;width:64px;height:64px;border:0;border-radius:50%;background:var(--primary);color:#fff;cursor:pointer;font-size:29px;z-index:10001;box-shadow:0 12px 30px rgba(31,95,209,.35)}
+    #career-hint{position:fixed;right:100px;bottom:38px;z-index:10000;padding:10px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.12);font-size:14px}
+    body.chat-open #career-hint{display:none}
+    #cai-wc-box{position:fixed !important;right:24px !important;bottom:100px !important;width:min(420px,calc(100vw - 48px)) !important;height:min(680px,calc(100vh - 140px)) !important;max-height:76vh !important;z-index:10000 !important;border-radius:18px !important;overflow:hidden !important;box-shadow:0 20px 60px rgba(15,23,42,.25) !important}
+    body:not(.chat-open) #cai-wc-box{display:none !important}
+    body.chat-open #cai-wc-box{display:block !important}
+    #status-box{display:none;position:fixed;right:24px;bottom:100px;width:min(420px,calc(100vw - 48px));padding:18px;border:1px solid #e5e7eb;border-radius:16px;background:#fff;z-index:9999;box-shadow:0 20px 60px rgba(15,23,42,.18);color:#475569}
+    body.chat-loading #status-box{display:block}
+    body.chat-error #status-box{display:block}
+    #status-title{font-weight:800;color:#1f2937;margin-bottom:8px}
+    #status-detail{font-size:14px;line-height:1.6}
+    @media(max-width:800px){.hero{grid-template-columns:1fr}.features{grid-template-columns:1fr}#career-hint{display:none}#career-launcher{right:16px;bottom:16px}#cai-wc-box{right:12px !important;bottom:90px !important;width:calc(100vw - 24px) !important;height:calc(100vh - 112px) !important;max-height:none !important}}
+  </style>
+</head>
+<body>
+<header><div class="brand">AI 生涯推薦</div><div class="tag">根據學生特質進行生涯推薦</div></header>
+<main>
+  <section class="hero">
+    <div>
+      <div class="pill">30 題問卷 × RIASEC × 生成式 AI</div>
+      <h1>探索你的特質，找到值得進一步了解的生涯方向</h1>
+      <p class="lead">透過興趣、能力、個人特質、學習方式與工作環境偏好，產生可解釋的學群、科系與職業探索建議。</p>
+      <button class="primary-btn" onclick="toggleCareerChat()">開始生涯探索</button>
+    </div>
+    <div class="flow-card">
+      <div class="step">① 回答 30 題生涯探索問卷</div><div class="arrow">↓</div>
+      <div class="step">② C.ai 整理學生回答</div><div class="arrow">↓</div>
+      <div class="step">③ Groq / LLM 進行分析</div><div class="arrow">↓</div>
+      <div class="step">④ 顯示學群、科系與職業建議</div><div class="arrow">↓</div>
+      <div class="step">⑤ BizForm 儲存結果</div>
+    </div>
+  </section>
+  <section class="features">
+    <div class="feature"><h3>多面向分析</h3><p>綜合 RIASEC、能力、學習偏好、價值觀與工作環境，不只看單一分數。</p></div>
+    <div class="feature"><h3>可解釋推薦</h3><p>說明推薦理由，也提醒能力與偏好之間可能存在的落差。</p></div>
+    <div class="feature"><h3>持續探索</h3><p>推薦是探索起點，而不是替學生做決定，可再深入詢問科系與職業。</p></div>
+  </section>
+  <p class="note">※ 本系統提供生涯探索參考，不應視為唯一或絕對的升學決策依據。</p>
+</main>
+<div id="career-hint">點這裡開啟 AI 生涯推薦</div>
+<button id="career-launcher" onclick="toggleCareerChat()" aria-label="開啟聊天">💬</button>
+<div id="status-box"><div id="status-title">正在連接 C.ai WebChat…</div><div id="status-detail">第一次載入可能需要幾秒鐘。</div></div>
+<script>
+  const CAI_HOST='https://cai-innoserve.gss.com.tw';
+  const BOT_ID='sam';
+  let loadStarted=false,caiReady=false;
+  function setStatus(title,detail,isError=false){document.getElementById('status-title').textContent=title;document.getElementById('status-detail').textContent=detail;document.body.classList.remove('chat-loading','chat-error');document.body.classList.add(isError?'chat-error':'chat-loading')}
+  function clearStatus(){document.body.classList.remove('chat-loading','chat-error')}
+  function loadScript(url,callback){const scriptTag=document.createElement('script');scriptTag.src=url+'?_='+Date.now();scriptTag.onload=()=>callback&&callback();scriptTag.onerror=()=>setStatus('C.ai WebChat 無法載入','目前網站來源：'+location.origin+'。若 Console 顯示 CORS，請將這個 HTTPS 網域提供給 C.ai／叡揚管理員加入 WebChat 允許來源。',true);document.head.appendChild(scriptTag)}
+  function startCai(){if(loadStarted)return;loadStarted=true;setStatus('正在連接 C.ai WebChat…','目前網站來源：'+location.origin);loadScript(CAI_HOST+'/webchat/caiwebchat-config.js',function(){loadScript(CAI_HOST+'/webchat/caiwebchat-loader.js');loadScript(CAI_HOST+'/webchat/bots/'+BOT_ID+'/custom.js')});setTimeout(function(){if(!caiReady){setStatus('尚未取得 C.ai WebChat 權限','若你已使用 HTTPS 網址，請按 Ctrl+Shift+J 查看 Console。若看到 CORS / Access-Control-Allow-Origin，代表 C.ai 需將 '+location.origin+' 加入允許來源。',true)}},12000)}
+  window.onCaiWebChatLoaded=function(){try{CaiWebChat.init({botId:BOT_ID});loadScript(CAI_HOST+'/webchat/bots/'+BOT_ID+'/customWebChatLoaded.js');caiReady=true;clearStatus();document.body.classList.add('chat-open')}catch(e){setStatus('WebChat 初始化失敗',String(e),true)}};
+  window.onConnectFulfill=function(){loadScript(CAI_HOST+'/webchat/bots/'+BOT_ID+'/customConnectFulfill.js')};
+  function toggleCareerChat(){if(!loadStarted){document.body.classList.add('chat-open');startCai();return}document.body.classList.toggle('chat-open');if(document.body.classList.contains('chat-open')&&!caiReady){setStatus('正在連接 C.ai WebChat…','目前網站來源：'+location.origin)}else if(!document.body.classList.contains('chat-open')){clearStatus()}}
+</script>
+</body>
+</html>
