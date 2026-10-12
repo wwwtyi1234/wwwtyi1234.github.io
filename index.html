@@ -86,8 +86,31 @@
   function clearStatus(){document.body.classList.remove('chat-loading','chat-error')}
   function loadScript(url,callback){const scriptTag=document.createElement('script');scriptTag.src=url+'?_='+Date.now();scriptTag.onload=()=>callback&&callback();scriptTag.onerror=()=>setStatus('C.ai WebChat 無法載入','目前網站來源：'+location.origin+'。若 Console 顯示 CORS，請將這個 HTTPS 網域提供給 C.ai／叡揚管理員加入 WebChat 允許來源。',true);document.head.appendChild(scriptTag)}
   function startCai(){if(loadStarted)return;loadStarted=true;setStatus('正在連接 C.ai WebChat…','目前網站來源：'+location.origin);loadScript(CAI_HOST+'/webchat/caiwebchat-config.js',function(){loadScript(CAI_HOST+'/webchat/caiwebchat-loader.js');loadScript(CAI_HOST+'/webchat/bots/'+BOT_ID+'/custom.js')});setTimeout(function(){if(!caiReady){setStatus('尚未取得 C.ai WebChat 權限','若你已使用 HTTPS 網址，請按 Ctrl+Shift+J 查看 Console。若看到 CORS / Access-Control-Allow-Origin，代表 C.ai 需將 '+location.origin+' 加入允許來源。',true)}},12000)}
-  window.onCaiWebChatLoaded=function(){try{CaiWebChat.init({botId:BOT_ID});loadScript(CAI_HOST+'/webchat/bots/'+BOT_ID+'/customWebChatLoaded.js');caiReady=true;clearStatus();document.body.classList.add('chat-open')}catch(e){setStatus('WebChat 初始化失敗',String(e),true)}};
-  window.onConnectFulfill=function(){loadScript(CAI_HOST+'/webchat/bots/'+BOT_ID+'/customConnectFulfill.js')};
+ 
+window.onCaiWebChatLoaded = function() {
+  try {
+    setStatus('聊天元件已載入', '正在等待 C.ai 建立連線…');
+    document.getElementById('status-box').style.zIndex = '10002';
+
+    CaiWebChat.init({ botId: BOT_ID });
+
+    loadScript(
+      CAI_HOST + '/webchat/bots/' + BOT_ID + '/customWebChatLoaded.js'
+    );
+  } catch (e) {
+    setStatus('WebChat 初始化失敗', String(e), true);
+  }
+};
+
+window.onConnectFulfill = function() {
+  caiReady = true;
+  clearStatus();
+
+  loadScript(
+    CAI_HOST + '/webchat/bots/' + BOT_ID + '/customConnectFulfill.js'
+  );
+};
+
   function toggleCareerChat(){if(!loadStarted){document.body.classList.add('chat-open');startCai();return}document.body.classList.toggle('chat-open');if(document.body.classList.contains('chat-open')&&!caiReady){setStatus('正在連接 C.ai WebChat…','目前網站來源：'+location.origin)}else if(!document.body.classList.contains('chat-open')){clearStatus()}}
 </script>
 </body>
