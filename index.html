@@ -38,6 +38,8 @@
     #career-launcher{position:fixed;right:24px;bottom:24px;width:64px;height:64px;border:0;border-radius:50%;background:var(--primary);color:#fff;cursor:pointer;font-size:29px;z-index:10001;box-shadow:0 12px 30px rgba(31,95,209,.35)}
     /* 隱藏 C.ai 預設啟動按鈕；改用網站右下角自訂的聊天按鈕 */
     #cai-wc-minimize-avatar-btn{display:none !important}
+    /* 隱藏兩個重複的聊天提示泡泡，保留亮藍色自訂按鈕 */
+    #cai-wc-preview-message, #career-hint{display:none !important}
     #career-hint{position:fixed;right:100px;bottom:38px;z-index:10000;padding:10px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.12);font-size:14px}
     body.chat-open #career-hint{display:none}
     #cai-wc-box{position:fixed !important;right:24px !important;bottom:100px !important;width:min(420px,calc(100vw - 48px)) !important;height:min(680px,calc(100vh - 140px)) !important;max-height:76vh !important;z-index:10000 !important;border-radius:18px !important;overflow:hidden !important;box-shadow:0 20px 60px rgba(15,23,42,.25) !important}
