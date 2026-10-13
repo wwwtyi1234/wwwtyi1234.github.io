@@ -39,8 +39,8 @@
     #career-hint{position:fixed;right:100px;bottom:38px;z-index:10000;padding:10px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.12);font-size:14px}
     body.chat-open #career-hint{display:none}
     #cai-wc-box{position:fixed !important;right:24px !important;bottom:100px !important;width:min(420px,calc(100vw - 48px)) !important;height:min(680px,calc(100vh - 140px)) !important;max-height:76vh !important;z-index:10000 !important;border-radius:18px !important;overflow:hidden !important;box-shadow:0 20px 60px rgba(15,23,42,.25) !important}
-    body:not(.chat-open) #cai-wc-box{display:none !important}
-    body.chat-open #cai-wc-box{display:block !important}
+    body:not(.chat-open) #cai-wc-box{visibility:hidden !important;opacity:0 !important;pointer-events:none !important}
+    body.chat-open #cai-wc-box{visibility:visible !important;opacity:1 !important;pointer-events:auto !important}
     #status-box{display:none;position:fixed;right:24px;bottom:100px;width:min(420px,calc(100vw - 48px));padding:18px;border:1px solid #e5e7eb;border-radius:16px;background:#fff;z-index:9999;box-shadow:0 20px 60px rgba(15,23,42,.18);color:#475569}
     body.chat-loading #status-box{display:block}
     body.chat-error #status-box{display:block}
@@ -78,41 +78,44 @@
 <div id="career-hint">點這裡開啟 AI 生涯推薦</div>
 <button id="career-launcher" onclick="toggleCareerChat()" aria-label="開啟聊天">💬</button>
 <div id="status-box"><div id="status-title">正在連接 C.ai WebChat…</div><div id="status-detail">第一次載入可能需要幾秒鐘。</div></div>
-<script>
-  const isDemoSite = false;
-  const CAI_HOST='https://cai-innoserve.gss.com.tw';
-  const BOT_ID='sam';
-  let loadStarted=false,caiReady=false;
-  function setStatus(title,detail,isError=false){document.getElementById('status-title').textContent=title;document.getElementById('status-detail').textContent=detail;document.body.classList.remove('chat-loading','chat-error');document.body.classList.add(isError?'chat-error':'chat-loading')}
-  function clearStatus(){document.body.classList.remove('chat-loading','chat-error')}
-  function loadScript(url,callback){const scriptTag=document.createElement('script');scriptTag.src=url+'?_='+Date.now();scriptTag.onload=()=>callback&&callback();scriptTag.onerror=()=>setStatus('C.ai WebChat 無法載入','目前網站來源：'+location.origin+'。若 Console 顯示 CORS，請將這個 HTTPS 網域提供給 C.ai／叡揚管理員加入 WebChat 允許來源。',true);document.head.appendChild(scriptTag)}
-  function startCai(){if(loadStarted)return;loadStarted=true;setStatus('正在連接 C.ai WebChat…','目前網站來源：'+location.origin);loadScript(CAI_HOST+'/webchat/caiwebchat-config.js',function(){loadScript(CAI_HOST+'/webchat/caiwebchat-loader.js');loadScript(CAI_HOST+'/webchat/bots/'+BOT_ID+'/custom.js')});setTimeout(function(){if(!caiReady){setStatus('尚未取得 C.ai WebChat 權限','若你已使用 HTTPS 網址，請按 Ctrl+Shift+J 查看 Console。若看到 CORS / Access-Control-Allow-Origin，代表 C.ai 需將 '+location.origin+' 加入允許來源。',true)}},12000)}
- 
-window.onCaiWebChatLoaded = function() {
-  try {
-    setStatus('聊天元件已載入', '正在等待 C.ai 建立連線…');
-    document.getElementById('status-box').style.zIndex = '10002';
 
-    CaiWebChat.init({ botId: BOT_ID });
+<script>
+  // 先沿用已驗證成功的 C.ai 官方嵌入方式，讓聊天元件於開頁時初始化
+    const isDemoSite = false;
+
+    function loadScript(url, callback) {
+      var scriptTag = document.createElement('script');
+      scriptTag.src = url + '?_=' + new Date().getTime();
+      scriptTag.onload = function () {
+        if (callback) callback();
+      };
+      document.head.appendChild(scriptTag);
+    }
 
     loadScript(
-      CAI_HOST + '/webchat/bots/' + BOT_ID + '/customWebChatLoaded.js'
+      'https://cai-innoserve.gss.com.tw/webchat/caiwebchat-config.js',
+      function () {
+        loadScript('https://cai-innoserve.gss.com.tw/webchat/caiwebchat-loader.js');
+        loadScript('https://cai-innoserve.gss.com.tw/webchat/bots/sam/custom.js');
+      }
     );
-  } catch (e) {
-    setStatus('WebChat 初始化失敗', String(e), true);
+
+    window.onCaiWebChatLoaded = function () {
+      CaiWebChat.init({ botId: 'sam' });
+      loadScript('https://cai-innoserve.gss.com.tw/webchat/bots/sam/customWebChatLoaded.js');
+    };
+
+    window.onConnectFulfill = function () {
+      loadScript('https://cai-innoserve.gss.com.tw/webchat/bots/sam/customConnectFulfill.js');
+    };
+
+  // 網站自己的浮動聊天按鈕只負責開啟及收合，不重複初始化元件
+  function toggleCareerChat() {
+    const willOpen = !document.body.classList.contains('chat-open');
+    document.body.classList.toggle('chat-open', willOpen);
+    document.getElementById('career-launcher')
+      .setAttribute('aria-expanded', String(willOpen));
   }
-};
-
-window.onConnectFulfill = function() {
-  caiReady = true;
-  clearStatus();
-
-  loadScript(
-    CAI_HOST + '/webchat/bots/' + BOT_ID + '/customConnectFulfill.js'
-  );
-};
-
-  function toggleCareerChat(){if(!loadStarted){document.body.classList.add('chat-open');startCai();return}document.body.classList.toggle('chat-open');if(document.body.classList.contains('chat-open')&&!caiReady){setStatus('正在連接 C.ai WebChat…','目前網站來源：'+location.origin)}else if(!document.body.classList.contains('chat-open')){clearStatus()}}
 </script>
 </body>
 </html>
