@@ -79,6 +79,7 @@
 <button id="career-launcher" onclick="toggleCareerChat()" aria-label="開啟聊天">💬</button>
 <div id="status-box"><div id="status-title">正在連接 C.ai WebChat…</div><div id="status-detail">第一次載入可能需要幾秒鐘。</div></div>
 <script>
+  const isDemoSite = false;
   const CAI_HOST='https://cai-innoserve.gss.com.tw';
   const BOT_ID='sam';
   let loadStarted=false,caiReady=false;
