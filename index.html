@@ -113,12 +113,25 @@
       loadScript('https://cai-innoserve.gss.com.tw/webchat/bots/sam/customConnectFulfill.js');
     };
 
-  // 網站自己的浮動聊天按鈕只負責開啟及收合，不重複初始化元件
+  // C.ai 可能先將聊天視窗設為 display:none；此時必須呼叫其原生展開按鈕。
+  // 只在原生視窗確實收合時觸發，以免影響已開啟的對話。
   function toggleCareerChat() {
-    const willOpen = !document.body.classList.contains('chat-open');
-    document.body.classList.toggle('chat-open', willOpen);
-    document.getElementById('career-launcher')
-      .setAttribute('aria-expanded', String(willOpen));
+    const box = document.getElementById('cai-wc-box');
+    const nativeLauncher = document.getElementById('cai-wc-minimize-avatar-btn');
+    const launcher = document.getElementById('career-launcher');
+    const isCollapsed = !box || getComputedStyle(box).display === 'none';
+    const isShownByUs = document.body.classList.contains('chat-open');
+    const shouldOpen = !isShownByUs || isCollapsed;
+
+    if (shouldOpen && isCollapsed) {
+      if (!nativeLauncher) {
+        console.warn('C.ai 尚未載入完成，請稍候再按聊天按鈕');
+        return;
+      }
+      nativeLauncher.click();
+    }
+    document.body.classList.toggle('chat-open', shouldOpen);
+    if (launcher) launcher.setAttribute('aria-expanded', String(shouldOpen));
   }
 </script>
 </body>
