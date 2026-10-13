@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>C.ai WebChat 官方嵌入測試</title>
+  <meta http-equiv="Content-Security-Policy"
+        content="
+          default-src 'self' data: blob: https://cai-innoserve.gss.com.tw;
+          script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cai-innoserve.gss.com.tw;
+          style-src 'self' 'unsafe-inline' https://cai-innoserve.gss.com.tw;
+          img-src 'self' data: blob: https://cai-innoserve.gss.com.tw;
+          font-src 'self' data: https://cai-innoserve.gss.com.tw;
+          connect-src 'self' https://cai-innoserve.gss.com.tw wss://cai-innoserve.gss.com.tw;
+          frame-src https://cai-innoserve.gss.com.tw;
+        ">
+</head>
+<body>
+  <h2>C.ai WebChat 官方嵌入測試</h2>
+  <p>請查看聊天機器人能否正常顯示問卷。</p>
+
+  <script>
+    const isDemoSite = false;
+
+    function loadScript(url, callback) {
+      var scriptTag = document.createElement('script');
+      scriptTag.src = url + '?_=' + new Date().getTime();
+      scriptTag.onload = function () {
+        if (callback) callback();
+      };
+      document.head.appendChild(scriptTag);
+    }
+
+    loadScript(
+      'https://cai-innoserve.gss.com.tw/webchat/caiwebchat-config.js',
+      function () {
+        loadScript('https://cai-innoserve.gss.com.tw/webchat/caiwebchat-loader.js');
+        loadScript('https://cai-innoserve.gss.com.tw/webchat/bots/sam/custom.js');
+      }
+    );
+
+    window.onCaiWebChatLoaded = function () {
+      CaiWebChat.init({ botId: 'sam' });
+      loadScript('https://cai-innoserve.gss.com.tw/webchat/bots/sam/customWebChatLoaded.js');
+    };
+
+    window.onConnectFulfill = function () {
+      loadScript('https://cai-innoserve.gss.com.tw/webchat/bots/sam/customConnectFulfill.js');
+    };
+  </script>
+</body>
+</html>
